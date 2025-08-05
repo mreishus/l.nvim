@@ -27,7 +27,7 @@ function M.setup_filetype_ac()
 	-- Set up autocmd for our custom filetype
 	vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged", "TextChangedI" }, {
 		group = group,
-		pattern = "*." .. constants.filetype_ext,
+		buffer = buffers.diff_buffer, -- Use the buffer number instead of a pattern (not sure if this is good)
 		callback = function(ev)
 			editor.mark_codeblocks(ev.buf)
 			--M.editor.highlight_extmarks(ev.buf)
