@@ -208,15 +208,15 @@ function M.setup(_opts)
 	state.llm_log_path = state.project_lnvim_dir .. "/logs"
 
 	-- Check for .gitignore file and add .lnvim directory to it
-	local gitignore_path = state.project_root .. "/.gitignore"
-	if vim.fn.filereadable(gitignore_path) == 1 then
-		local gitignore_content = vim.fn.readfile(gitignore_path)
-		local lnvim_entry = ".lnvim/"
-		if not vim.tbl_contains(gitignore_content, lnvim_entry) then
-			table.insert(gitignore_content, lnvim_entry)
-			vim.fn.writefile(gitignore_content, gitignore_path)
-		end
-	end
+	-- local gitignore_path = state.project_root .. "/.gitignore"
+	-- if vim.fn.filereadable(gitignore_path) == 1 then
+	--	local gitignore_content = vim.fn.readfile(gitignore_path)
+	--	local lnvim_entry = ".lnvim/"
+	--	if not vim.tbl_contains(gitignore_content, lnvim_entry) then
+	--		table.insert(gitignore_content, lnvim_entry)
+	--		vim.fn.writefile(gitignore_content, gitignore_path)
+	--	end
+	--end
 
 	-- load the system prompt from global or proj
 	local system_prompt_content = vim.fn.readfile(project_system_prompt_path)
