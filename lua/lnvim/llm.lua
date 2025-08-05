@@ -552,7 +552,7 @@ function M.handle_openai_data(data_stream, event_state)
          content = json.choices[1].delta.reasoning_content
       end
       if content and content ~= vim.NIL then
-         vim.print(vim.inspect(json))
+         -- vim.print(vim.inspect(json))
          M.write_string_at_llmstream(content)
       end
    elseif data_stream:match("%[DONE%]") then
