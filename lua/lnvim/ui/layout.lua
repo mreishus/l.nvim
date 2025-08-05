@@ -135,10 +135,8 @@ function M.show_drawer()
     local layout = M.create_layout()
 
     -- Name the diff buffer
-    vim.api.nvim_buf_set_name(
-        buffers.diff_buffer,
-        "~" .. os.date("!%Y-%m-%d_%H-%M-%S_out") .. "." .. constants.filetype_ext
-    )
+    vim.api.nvim_buf_set_name(buffers.diff_buffer, "l-nvim-chat")
+    vim.api.nvim_buf_set_option(buffers.diff_buffer, "filetype", "markdown")
     -- Diff buffer opts
     vim.api.nvim_win_set_option(layout.diff, "wrap", true)
 
