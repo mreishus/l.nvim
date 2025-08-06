@@ -686,7 +686,7 @@ function M.call_llm(args, handler)
 
       local or_processing = line:match("OPENROUTER PROCESSING")
       if or_processing then
-         M.write_string_at_llmstream(line .. "\n")
+         -- M.write_string_at_llmstream(line .. "\n")
          return
       end
       local event = line:match("^event: (.+)$")
