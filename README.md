@@ -166,6 +166,14 @@ You can either override this list with `opts.models` or just add additional mode
     - **Keybinding**: `<Leader>;w` (in visual mode)
     - **Description**: Stream selected text through qask. (WIP/Undocumented)
 
+23. **`ViewIncludedFiles`**
+    - **Keybinding**: `<Leader>;v`
+    - **Description**: View (and remove with <C-d>) list of files included in LLM context.
+
+24. **`AddCurrentFile`**
+    - **Keybinding**: `<Leader>;A`
+    - **Description**: Add current file to LLM context if not already included.
+
 ### Cache Control (Anthropic Only)
 
 - **`CacheOnlyFiles`**
