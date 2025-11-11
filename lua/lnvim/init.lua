@@ -15,9 +15,9 @@ function M.add_model(model)
 end
 
 function M.setup(_opts)
-	if setup_called then
-		return
-	end
+	-- if setup_called then
+	-- 	return
+	-- end
 	setup_called = true
 	cfg.setup(_opts)
 	vim.cmd([[
