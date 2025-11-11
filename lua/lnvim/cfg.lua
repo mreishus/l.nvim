@@ -446,6 +446,9 @@ function M.setup(_opts)
 		end)
 	end, {})
 
+	M.make_plugKey("ViewIncludedFiles", "n", "v", lcmd.view_included_files, { desc = "View/remove included files in context" })
+	M.make_plugKey("AddCurrentFile", "n", "A", lcmd.add_current_file_to_context, { desc = "Add current file to context if not included" })
+
 	state.status = "Idle"
 end
 

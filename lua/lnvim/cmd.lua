@@ -576,4 +576,117 @@ MIT
 	end
 end
 
+function M.view_included_files()
+	if #state.files == 0 then
+		vim.notify("No files currently included in context", vim.log.levels.INFO)
+		return
+	end
+	require("telescope.pickers").new({}, {
+		prompt_title = "Included Files (Select w/ <Tab>, <C-d> to remove - works in search mode!)",
+		finder = require("telescope.finders").new_table({
+			results = state.files,
+			entry_maker = function(entry)
+				return {
+					value = entry,
+					display = entry,
+					ordinal = entry,
+				}
+			end
+		}),
+		sorter = require("telescope.config").values.generic_sorter({}),
+		attach_mappings = function(prompt_bufnr, map)
+			local remove_action = function()
+				local current_picker = action_state.get_current_picker(prompt_bufnr)
+				local selections = current_picker:get_multi_selection()
+				if #selections == 0 then
+					local single = action_state.get_selected_entry()
+					if single then selections = {single} end
+				end
+				if #selections == 0 then
+					vim.notify("No files selected to remove", vim.log.levels.WARN)
+					return
+				end
+				-- Optional: Skip confirmation for single selection
+				local confirm_msg = "Remove " .. #selections .. " files? (y/n): "
+				if #selections == 1 then
+					local to_remove = {}
+					for _, sel in ipairs(selections) do
+						to_remove[sel.value] = true
+					end
+					state.files = vim.tbl_filter(function(path)
+						return not to_remove[path]
+					end, state.files)
+					vim.notify("1 file removed from context", vim.log.levels.INFO)
+					-- Refresh files buffer if it exists
+					local files_buf = buffers.files_buffer
+					if files_buf and type(files_buf) == "number" and vim.api.nvim_buf_is_valid(files_buf) then
+						vim.api.nvim_buf_set_lines(files_buf, 0, -1, false, state.files)
+					else
+						vim.notify("Skipped updating files buffer (not initialized)", vim.log.levels.DEBUG)  -- Optional debug
+					end
+					actions.close(prompt_bufnr)
+					M.view_included_files()  -- Re-open to show updates
+					return
+				end
+				-- Multi-confirm
+				vim.ui.input({ prompt = confirm_msg }, function(input)
+					if input and input:lower() == "y" then
+						local to_remove = {}
+						for _, sel in ipairs(selections) do
+							to_remove[sel.value] = true
+						end
+						state.files = vim.tbl_filter(function(path)
+							return not to_remove[path]
+						end, state.files)
+						vim.notify(#selections .. " files removed from context", vim.log.levels.INFO)
+						-- Refresh files buffer if it exists
+						if vim.api.nvim_buf_is_valid(buffers.files_buffer) then
+							vim.api.nvim_buf_set_lines(buffers.files_buffer, 0, -1, false, state.files)
+						end
+						actions.close(prompt_bufnr)
+						M.view_included_files()  -- Re-open to show updates
+					end
+				end)
+			end
+			-- Map in normal mode
+			map("n", "<C-d>", remove_action)
+			-- Map in insert mode (NEW: allows direct use without <Esc>)
+			map("i", "<C-d>", remove_action)
+			-- Default close action
+			actions.select_default:replace(function()
+				actions.close(prompt_bufnr)
+			end)
+			return true
+		end,
+	}):find()
+end
+
+function M.add_current_file_to_context()
+	local layout = require("lnvim.ui.layout").get_layout()
+	local current_buf = vim.api.nvim_get_current_buf()
+	-- If in diff buffer, use main window's buffer instead
+	if current_buf == buffers.diff_buffer and layout and layout.main then
+		current_buf = vim.api.nvim_win_get_buf(layout.main)
+	end
+	-- FIXED: Use fnamemodify for clean absolute path (no literal ":p" appended)
+	local file_path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(current_buf), ':p')
+	if file_path == "" or vim.fn.isdirectory(file_path) == 1 then
+		vim.notify("No valid file open to add", vim.log.levels.WARN)
+		return
+	end
+	if vim.tbl_contains(state.files, file_path) then
+		vim.notify("File already included in context", vim.log.levels.INFO)
+		return
+	end
+	table.insert(state.files, file_path)
+	vim.notify("Added current file to context: " .. vim.fn.fnamemodify(file_path, ":t"), vim.log.levels.INFO)
+	-- Safe update of files buffer
+	local files_buf = buffers.files_buffer
+	if files_buf and type(files_buf) == "number" and vim.api.nvim_buf_is_valid(files_buf) then
+		vim.api.nvim_buf_set_lines(files_buf, 0, -1, false, state.files)
+	end
+	-- Optional: Update summary if needed
+	require("lnvim.ui.layout").update_summary()
+end
+
 return M
